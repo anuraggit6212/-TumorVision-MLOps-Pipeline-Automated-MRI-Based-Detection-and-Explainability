@@ -15,7 +15,7 @@ train:
 
 model:
   name: VGG19
-  trainable: False
+  trainable: True
   train_path: data/processed/train
   test_path: data/processed/test
   image_size: [255, 255]
@@ -27,7 +27,7 @@ model:
   sav_dir: models/trained.h5
 
 img_augment:
-  rescale: 1./255
+  rescale: 0.0039215686
   shear_range: 0.2
   zoom_range: 0.2
   horizontal_flip: True
