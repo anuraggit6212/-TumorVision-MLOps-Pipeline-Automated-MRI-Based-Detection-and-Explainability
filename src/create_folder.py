@@ -14,7 +14,7 @@ def create_fold(config, image=None):
     # print(dirr)
     # print(cla)
 
-    if os.path.exists(dirr+'/'+'train'+'class_0') and os.path.exists(dirr+'/'+'test'+'class_0'):
+    if os.path.exists(dirr+'/'+'train'+'/'+'class_0') and os.path.exists(dirr+'/'+'test'+'/'+'class_0'):
         print('Train and Test Folder already exist......')
         print("I'm skipping it.....")
     
