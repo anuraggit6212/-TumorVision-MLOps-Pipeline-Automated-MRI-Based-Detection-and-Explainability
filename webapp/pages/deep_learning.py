@@ -52,13 +52,32 @@ def preprocess_image(image):
     image = np.expand_dims(image, axis=0)
     return image
 
-def generate_gradcam(image, model):
-    """ Generate Grad-CAM Visualisation """
-    # Dummy implementation (replace with actual Grad-CAM logic)
-    img_array = np.array(image)
-    heatmap = np.uint8(255 * np.random.rand(*img_array.shape[:2]))
+def generate_gradcam(img_tensor, model, last_conv_layer_name='block5_conv3'):
+    # Create a model that maps the input to the activations of the last conv layer
+    grad_model = tf.keras.models.Model(
+        [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
+    )
+    with tf.GradientTape() as tape:
+        conv_outputs, predictions = grad_model(img_tensor)
+        pred_index = tf.argmax(predictions[0])
+        pred_output = predictions[:, pred_index]
+    # Compute gradients of the top predicted class with respect to conv outputs
+    grads = tape.gradient(pred_output, conv_outputs)
+    # Pool the gradients over all axes except channels
+    pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+    # Multiply each feature map by the pooled gradient
+    conv_outputs = conv_outputs[0]
+    heatmap = tf.reduce_sum(tf.multiply(conv_outputs, pooled_grads), axis=-1)
+    # Apply ReLU and normalize
+    heatmap = tf.maximum(heatmap, 0)
+    heatmap /= tf.math.reduce_max(heatmap) + 1e-8
+    heatmap = heatmap.numpy()
+    # Resize heatmap to original image size
+    heatmap = cv2.resize(heatmap, (255, 255))
+    heatmap = np.uint8(255 * heatmap)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    return Image.fromarray(heatmap)
+    return heatmap
+
 
 def download_report(pred_class, confidence):
     """ Generate and return a downloadable report """
@@ -93,8 +112,14 @@ if uploaded_file:
             st.success(f"Prediction: {pred_class}")
             st.info(f"Confidence: {confidence:.2f}%")
         with col2:
-            gradcam_image = generate_gradcam(image, model)
-            st.image(gradcam_image, caption="Grad-CAM Visualisation", use_column_width=True)
+            # gradcam_image = generate_gradcam(image, model)
+            # st.image(gradcam_image, caption="Grad-CAM Visualisation", use_column_width=True)
+
+            heatmap = generate_gradcam(input_tensor, model)
+            # Overlay heatmap on original image
+            img = np.array(image.resize((255,255)))
+            overlay = cv2.addWeighted(img, 0.6, heatmap, 0.4, 0)
+            st.image(overlay, caption="Grad-CAM Overlay", use_column_width=True)
         
         # Download Report
         st.markdown(download_report(pred_class, confidence), unsafe_allow_html=True)

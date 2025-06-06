@@ -66,12 +66,32 @@ def train_model(config_file):
 
         history = mod.fit(train_set,epochs = epochs,validation_data = test_set,steps_per_epoch = len(train_set),validation_steps = len(test_set)) 
 
-        plt.plot(history.history['loss'], label = 'train_loss')
-        plt.plot(history.history['val_loss'], label = 'val_loss')
-        plt.plot(history.history['accuracy'], label = 'train_acc')
-        plt.plot(history.history['val_accuracy'], label = 'val_acc')
+        # plt.plot(history.history['loss'], label = 'train_loss')
+        # plt.plot(history.history['val_loss'], label = 'val_loss')
+        # plt.plot(history.history['accuracy'], label = 'train_acc')
+        # plt.plot(history.history['val_accuracy'], label = 'val_acc')
+        # plt.legend()
+        # plt.savefig('reports/model_performance.png')
+
+        # start a fresh figure
+        plt.figure(figsize=(8,6))
+
+        # loss curves
+        plt.plot(history.history['loss'],     label='Train Loss')
+        plt.plot(history.history['val_loss'], label='Val Loss')
+
+        # accuracy key may be 'accuracy' or 'acc'
+        acc = 'accuracy' if 'accuracy' in history.history else 'acc'
+        plt.plot(history.history[acc],            label=f'Train {acc.capitalize()}')
+        plt.plot(history.history[f'val_{acc}'],   label=f'Val {acc.capitalize()}')
+
+        plt.xlabel('Epoch')
+        plt.title('Training & Validation Metrics')
         plt.legend()
+        plt.grid(True)
+
         plt.savefig('reports/model_performance.png')
+        plt.close()
 
         mod.save(model_path)
         print("Model Saved Successfully....!")
