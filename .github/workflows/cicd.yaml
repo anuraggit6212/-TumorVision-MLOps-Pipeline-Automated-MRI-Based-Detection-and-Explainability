@@ -32,7 +32,7 @@ jobs:
       - name: Docker Build and Push to Docker Hub
         run: |
           docker build -t tumorvision:latest .
-          docker tag mlops_project:latest anuraggit6212/tumorvision:latest
+          docker tag tumorvision:latest anuraggit6212/tumorvision:latest
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker push anuraggit6212/tumorvision:latest
         env:
