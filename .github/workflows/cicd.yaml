@@ -31,10 +31,10 @@ jobs:
 
       - name: Docker Build and Push to Docker Hub
         run: |
-          docker build -t mlops_project:latest .
-          docker tag mlops_project:latest anuraggit6212/TumorVision:latest
+          docker build -t tumorvision:latest .
+          docker tag mlops_project:latest anuraggit6212/tumorvision:latest
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push anuraggit6212/TumorVision:latest
+          docker push anuraggit6212/tumorvision:latest
         env:
           DOCKER_CLI_ACI: 1
 
@@ -48,7 +48,7 @@ jobs:
       - name: Trivy File Scan
         run: |
           trivy fs . > trivy_scan.txt
-          trivy image anuraggit6212/TumorVision:latest > trivy_image_scan.txt
+          trivy image anuraggit6212/tumorvision:latest > trivy_image_scan.txt
       
       - name: Debug PATH
         run: echo $PATH
